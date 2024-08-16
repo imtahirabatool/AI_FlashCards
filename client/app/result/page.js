@@ -20,7 +20,7 @@ const ResultPage = () => {
             if(!session_id) return
 
             try{
-                const res = await fetch(`/api/checkout_session?session_id=${session_id}`)
+                const res = await fetch(`/pages/api/checkout_session?session_id=${session_id}`)
                 const sessionData = await res.json()
 
                 if(res.ok){

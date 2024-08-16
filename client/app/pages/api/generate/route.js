@@ -41,8 +41,77 @@ Return in the following JSON format:
     ]
 }`;
 
+// export async function POST(req) {
+//   const genAI = new GoogleGenerativeAI(API_KEY);
+
+//   try {
+//     const data = await req.json();
+//     console.log("Received data:", data);
+
+//     if (!data.prompt) {
+//       throw new Error("No prompt provided");
+//     }
+
+//     console.log("Calling Gemini API with prompt:", data.prompt);
+
+//     let completion;
+//     try {
+//       completion = await genAI.chat.completion.create({
+//         messages: [
+//           { role: "system", content: systemPrompt },
+//           { role: "user", content: `Generate flashcards for the topic: ${data.prompt}` },
+//         ],
+//         model: "gemini-pro",
+//       });
+//       console.log("API call succeeded:", completion);
+//     } catch (apiError) {
+//       console.error("API call failed:", apiError);
+
+//       if (apiError.response) {
+//         console.error("Response status:", apiError.response.status);
+//         console.error("Response headers:", apiError.response.headers);
+//         console.error("Response data:", apiError.response.data);
+//       } else if (apiError.request) {
+//         console.error("No response received:", apiError.request);
+//       } else {
+//         console.error("Error setting up request:", apiError.message);
+//       }
+
+//       throw new Error("Failed to contact Gemini API.");
+//     }
+
+//     console.log("Complete API response:", completion);
+
+//     const messageContent = completion?.choices?.[0]?.message?.content;
+//     console.log("Message content:", messageContent);
+
+//     if (!messageContent) {
+//       throw new Error("Invalid response from Gemini API");
+//     }
+
+//     let flashCards;
+//     try {
+//       flashCards = JSON.parse(messageContent);
+//     } catch (parseError) {
+//       console.error("Error parsing JSON response:", parseError);
+//       throw new Error("Failed to parse the response from Gemini API.");
+//     }
+
+//     if (!flashCards || !flashCards.flashcards) {
+//       throw new Error("Invalid response format from Gemini API");
+//     }
+
+//     return NextResponse.json({ flashcards: flashCards.flashcards });
+//   } catch (error) {
+//     console.error("Error generating flashcards:", error.message);
+//     return NextResponse.json({ error: error.message || "Failed to generate flashcards." }, { status: 500 });
+//   }
+// }
+
+
 export async function POST(req) {
   const genAI = new GoogleGenerativeAI(API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
   try {
     const data = await req.json();
@@ -56,33 +125,19 @@ export async function POST(req) {
 
     let completion;
     try {
-      completion = await genAI.chat.completion.create({
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Generate flashcards for the topic: ${data.prompt}` },
-        ],
-        model: "gemini-pro",
-      });
+      completion = await model.generateContent([
+        systemPrompt,
+        `Generate flashcards for the topic: ${data.prompt}`
+      ]);
       console.log("API call succeeded:", completion);
     } catch (apiError) {
       console.error("API call failed:", apiError);
-
-      if (apiError.response) {
-        console.error("Response status:", apiError.response.status);
-        console.error("Response headers:", apiError.response.headers);
-        console.error("Response data:", apiError.response.data);
-      } else if (apiError.request) {
-        console.error("No response received:", apiError.request);
-      } else {
-        console.error("Error setting up request:", apiError.message);
-      }
-
-      throw new Error("Failed to contact Gemini API.");
+      throw new Error("Failed to contact Gemini API: " + apiError.message);
     }
 
     console.log("Complete API response:", completion);
 
-    const messageContent = completion?.choices?.[0]?.message?.content;
+    const messageContent = completion.response.text();
     console.log("Message content:", messageContent);
 
     if (!messageContent) {

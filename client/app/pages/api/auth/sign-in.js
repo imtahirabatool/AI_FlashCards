@@ -57,7 +57,7 @@ export default async function handler(req, res) {
 }
 
 // Sign-up Route Handler
-async function signUpHandler(req, res) {
+export async function signUpHandler(req, res) {
   const { email, password, name, avatar } = req.body;
 
   if (!email || !password || !name) {

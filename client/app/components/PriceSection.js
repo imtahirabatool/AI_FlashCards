@@ -8,7 +8,7 @@ const PricingSection = () => {
   const user = useSelector((state) => state.user.user);
 
   const handleSubmit = async (event) => {
-    const checkoutSession = await fetch("/api/checkout_session", {
+    const checkoutSession = await fetch("/pages/api/checkout_session", {
       method: "POST",
       headers: {
         origin: "http://localhost:3000",

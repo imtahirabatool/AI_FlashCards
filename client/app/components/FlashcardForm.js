@@ -23,9 +23,10 @@ const FlashcardForm = ({ onAddFlashcard }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post("/api/generate/route", {
+      const response = await axios.post("/pages/api/generate", {
         prompt: `Topic: ${topic}`,
       });
+      console.log(response)
       const flashcard = response.data.flashcards?.[0]; 
       setQuestion(flashcard?.front || "No question generated");
       setAnswer(flashcard?.back || "No answer generated");
