@@ -2,18 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { RxAvatar } from "react-icons/rx";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import { useSignIn, useAuth } from "@clerk/nextjs";
+import { signInFail } from "../redux/userSlice";
 
 export default function SignIn() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
   const [avatar, setAvatar] = useState(null);
-  const { signIn } = useSignIn()
+  const { signIn } = useSignIn();
   const { isSignedIn, signOut } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -56,23 +58,40 @@ export default function SignIn() {
     e.preventDefault();
 
     try {
-      const response = await fetch('/api/auth/signin', {
-        method: 'POST',
+      const response = await fetch(`/sign-in`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        toast.success("Signed in successfully!");
-        router.push("/dashboard");
+      const contentType = response.headers.get("Content-Type");
+
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+
+        if (response.ok) {
+          toast.success("Signed in successfully!");
+          router.push("/dashboard");
+        } else {
+          toast.error(data.message || "Sign-in failed!");
+          console.error("Sign-in error:", data.message || "Sign-in failed!");
+          dispatch(signInFail(data.message || "Sign-in failed!"));
+        }
       } else {
-        toast.error(data.message);
+        const errorMessage =
+          typeof error.response === "string"
+            ? error.response
+            : JSON.stringify(error.response, null, 2);
+        toast.error(errorMessage);
+        console.error("Error:", errorMessage);
+        dispatch(signInFail(errorMessage));
       }
     } catch (error) {
+      console.error("Error:", error.message || error);
       toast.error("Error signing in");
+      dispatch(signInFail(error.message || "Error signing in"));
     }
   };
 
@@ -82,12 +101,15 @@ export default function SignIn() {
     }
     try {
       await signIn.authenticateWithRedirect({
-        strategy: 'oauth_google',
+        strategy: "oauth_google",
         redirectUrl: `${window.location.origin}/dashboard`,
         redirectUrlComplete: `${window.location.origin}/dashboard`,
       });
     } catch (error) {
-      console.error('Error signing in with Google:', error.response || error.message || error);
+      console.error(
+        "Error signing in with Google:",
+        error.response || error.message || error
+      );
     }
   };
 
@@ -198,13 +220,13 @@ export default function SignIn() {
             Sign In
           </button>
           <div className="mt-4">
-          <button
-            type="button"
-            className="w-full bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition-colors duration-300 mt-4"
-            onClick={handleGoogleSignIn}
-          >
-            Sign in with Google
-          </button>
+            <button
+              type="button"
+              className="w-full bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition-colors duration-300 mt-4"
+              onClick={handleGoogleSignIn}
+            >
+              Sign in with Google
+            </button>
           </div>
           <div className="w-full flex items-center justify-center">
             <h4 className="inline-block">Already have an account?</h4>

@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import PricingSection from "./components/PriceSection";
-import getStripe from "@/utils/get-stripe";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,7 +12,7 @@ export default function Home() {
   return (
     <Provider store={store}>
       <div
-        className={`min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 text-white ${inter.className}`}
+        className={`min-h-screen  p-10 flex flex-col items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 text-white ${inter.className}`}
       >
         {/* Header Section */}
         <header className="text-center mb-12">
@@ -97,8 +96,8 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <PricingSection/>
           </div>
+            <PricingSection/>
         </section>
       </div>
     </Provider>
