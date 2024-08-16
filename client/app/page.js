@@ -4,6 +4,8 @@ import { Inter } from "next/font/google";
 import { motion } from "framer-motion";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
+import PricingSection from "./components/PriceSection";
+import getStripe from "@/utils/get-stripe";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -94,6 +96,8 @@ export default function Home() {
                 </Typography>
               </CardContent>
             </Card>
+
+            <PricingSection/>
           </div>
         </section>
       </div>
