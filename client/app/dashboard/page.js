@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import FlashcardList from "../components/FlashcardList";
 import FlashcardForm from "../components/FlashcardForm";
+import PricingSection from "../components/PriceSection";
 
 const Dashboard = () => {
   const [flashcards, setFlashcards] = useState([]);
