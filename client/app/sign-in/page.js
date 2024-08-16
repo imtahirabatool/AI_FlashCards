@@ -7,11 +7,14 @@ import { motion } from "framer-motion";
 import { RxAvatar } from "react-icons/rx";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
+import { useSignIn, useAuth } from "@clerk/nextjs";
 
 export default function SignIn() {
   const router = useRouter();
   const { isAuthenticated } = useSelector((state) => state.user);
   const [avatar, setAvatar] = useState(null);
+  const { signIn } = useSignIn()
+  const { isSignedIn, signOut } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -27,7 +30,7 @@ export default function SignIn() {
   }, [isAuthenticated, router]);
 
   const handleChange = (e) => {
-    const { name, value, type, files } = e.target;
+    const { name, value, type } = e.target;
     if (type === "file") {
       handleFileInputChange(e);
     } else {
@@ -49,10 +52,43 @@ export default function SignIn() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle sign-in logic
-    toast.success("Signed in successfully!");
+
+    try {
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        toast.success("Signed in successfully!");
+        router.push("/dashboard");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error("Error signing in");
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (isSignedIn) {
+      await signOut();
+    }
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: `${window.location.origin}/dashboard`,
+        redirectUrlComplete: `${window.location.origin}/dashboard`,
+      });
+    } catch (error) {
+      console.error('Error signing in with Google:', error.response || error.message || error);
+    }
   };
 
   return (
@@ -161,6 +197,15 @@ export default function SignIn() {
           >
             Sign In
           </button>
+          <div className="mt-4">
+          <button
+            type="button"
+            className="w-full bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition-colors duration-300 mt-4"
+            onClick={handleGoogleSignIn}
+          >
+            Sign in with Google
+          </button>
+          </div>
           <div className="w-full flex items-center justify-center">
             <h4 className="inline-block">Already have an account?</h4>
             <a href="/login" className="text-blue-600 pl-2 inline-block">

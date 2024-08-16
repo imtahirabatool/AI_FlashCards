@@ -32,7 +32,7 @@ export default function SignIn() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle sign-in logic
+    router.push("/dashboard");
     toast.success("Signed in successfully!");
   };
 

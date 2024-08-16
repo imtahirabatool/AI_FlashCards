@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
+import { ClerkProvider } from '@clerk/nextjs';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,6 +15,10 @@ const metadata = {
 export default function RootLayout({ children }) {
   return (
     <Provider store={store}>
+    <ClerkProvider
+    publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+    secretKey={process.env.CLERK_SECRET_KEY}
+    >
       <html lang="en">
         <head>
           <title>{metadata.title}</title>
@@ -61,6 +66,7 @@ export default function RootLayout({ children }) {
           </footer>
         </body>
       </html>
+      </ClerkProvider>
     </Provider>
   );
 }
