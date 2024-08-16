@@ -1,15 +1,22 @@
+// //api/generate/route.js
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
+if (!API_KEY) {
+  console.error("GEMINI_API_KEY is not set. Please add it to your environment variables.");
+} else {
+  console.log("GEMINI_API_KEY is set.");
+}
+
 const systemPrompt = `
-You are a flashcard creator. Your task is to generate flashcards based on the provided content. For each flashcard, you will receive a topic or set of facts and you need to create a question and an answer related to that topic. Each flashcard should have the following format:
+You are a flashcard creator. Your task is to generate flashcards based on the provided content. For each flashcard, you will receive a topic or set of facts, and you need to create an answer related to that topic. Each flashcard should have the following format:
 
 1. **Question**: A clear, concise question related to the topic or facts provided.
 2. **Answer**: A precise answer that provides the correct information for the question.
 
-Ensure that the questions are designed to test knowledge or understanding of the topic, and the answers are accurate and informative. If the topic requires multiple flashcards to cover all important aspects, generate as many as needed to comprehensively cover the topic.
+Ensure that the questions and answers are designed to test knowledge or understanding of the topic, and are accurate and informative. If the topic requires multiple flashcards to cover all important aspects, generate as many as needed to comprehensively cover the topic.
 
 Here's an example of how to format the flashcards:
 
@@ -24,33 +31,79 @@ Here's an example of how to format the flashcards:
 - **Answer**: Mars.
 
 Please use this format to create flashcards for the given content.
-Also return in the following JSON format
+Return in the following JSON format:
 {
     "flashcards":[
-    {
-        "front":str,
-        "back":str
-    }
-]}`;
+        {
+            "front":str,
+            "back":str
+        }
+    ]
+}`;
 
 export async function POST(req) {
   const genAI = new GoogleGenerativeAI(API_KEY);
-  const data = await req.text();
 
   try {
-    const completion = await genAI.chat.completion.create({
-      messages: [
-        { role: "system", content: systemPrompt }, // Corrected role name
-        { role: "user", content: data },
-      ],
-      model: "gemini-pro",
-      response_format: { type: "json_object" },
-    });
+    const data = await req.json();
+    console.log("Received data:", data);
 
-    const flashCards = JSON.parse(completion.choices[0].message.content);
-    return NextResponse.json(flashCards.flashcards); // Ensure this matches your response structure
+    if (!data.prompt) {
+      throw new Error("No prompt provided");
+    }
+
+    console.log("Calling Gemini API with prompt:", data.prompt);
+
+    let completion;
+    try {
+      completion = await genAI.chat.completion.create({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Generate flashcards for the topic: ${data.prompt}` },
+        ],
+        model: "gemini-pro",
+      });
+      console.log("API call succeeded:", completion);
+    } catch (apiError) {
+      console.error("API call failed:", apiError);
+
+      if (apiError.response) {
+        console.error("Response status:", apiError.response.status);
+        console.error("Response headers:", apiError.response.headers);
+        console.error("Response data:", apiError.response.data);
+      } else if (apiError.request) {
+        console.error("No response received:", apiError.request);
+      } else {
+        console.error("Error setting up request:", apiError.message);
+      }
+
+      throw new Error("Failed to contact Gemini API.");
+    }
+
+    console.log("Complete API response:", completion);
+
+    const messageContent = completion?.choices?.[0]?.message?.content;
+    console.log("Message content:", messageContent);
+
+    if (!messageContent) {
+      throw new Error("Invalid response from Gemini API");
+    }
+
+    let flashCards;
+    try {
+      flashCards = JSON.parse(messageContent);
+    } catch (parseError) {
+      console.error("Error parsing JSON response:", parseError);
+      throw new Error("Failed to parse the response from Gemini API.");
+    }
+
+    if (!flashCards || !flashCards.flashcards) {
+      throw new Error("Invalid response format from Gemini API");
+    }
+
+    return NextResponse.json({ flashcards: flashCards.flashcards });
   } catch (error) {
-    console.error("Error generating flashcards:", error);
-    return NextResponse.error();
+    console.error("Error generating flashcards:", error.message);
+    return NextResponse.json({ error: error.message || "Failed to generate flashcards." }, { status: 500 });
   }
 }
