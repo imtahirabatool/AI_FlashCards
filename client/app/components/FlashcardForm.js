@@ -3,6 +3,8 @@
 "use-client";
 import React, { useState } from "react";
 import axios from "axios";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../../firebase"; 
 
 const FlashcardForm = ({ onAddFlashcard }) => {
   const [topic, setTopic] = useState("");
@@ -10,12 +12,20 @@ const FlashcardForm = ({ onAddFlashcard }) => {
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onAddFlashcard({ topic, question, answer });
-    setTopic("");
-    setQuestion("");
-    setAnswer("");
+    const newFlashcard = { topic, question, answer };
+
+    try {
+      // Save to Firebase
+      const docRef = await addDoc(collection(db, "flashcards"), newFlashcard);
+      onAddFlashcard({ id: docRef.id, ...newFlashcard });
+      setTopic("");
+      setQuestion("");
+      setAnswer("");
+    } catch (error) {
+      console.error("Error adding flashcard:", error);
+    }
   };
 
   const handleGenerateFlashcard = async () => {
@@ -26,8 +36,7 @@ const FlashcardForm = ({ onAddFlashcard }) => {
       const response = await axios.post("/pages/api/generate", {
         prompt: `Topic: ${topic}`,
       });
-      console.log(response)
-      const flashcard = response.data.flashcards?.[0]; 
+      const flashcard = response.data.flashcards?.[0];
       setQuestion(flashcard?.front || "No question generated");
       setAnswer(flashcard?.back || "No answer generated");
     } catch (error) {
