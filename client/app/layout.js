@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
-import { ClerkProvider, useUser, UserButton } from "@clerk/nextjs"; // Import useUser and UserButton
+import { ClerkProvider, useUser, UserButton } from "@clerk/nextjs"; 
 import { useState } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -36,7 +36,7 @@ export default function RootLayout({ children }) {
 }
 
 function Header() {
-  const { isSignedIn, user } = useUser(); // Check if user is signed in
+  const { isSignedIn, user } = useUser(); 
   const [active, setActive] = useState(false);
 
   return (
@@ -53,6 +53,14 @@ function Header() {
                 className="text-white hover:text-yellow-300 transition-colors duration-300 transform hover:scale-105"
               >
                 Home
+              </a>
+            </li>
+            <li>
+              <a
+                href="/dashboard"
+                className="text-white hover:text-yellow-300 transition-colors duration-300 transform hover:scale-105"
+              >
+                My FlashCards
               </a>
             </li>
             {!isSignedIn ? (
@@ -78,14 +86,6 @@ function Header() {
                 />
               </li>
             )}
-            <li>
-              <a
-                href="/dashboard"
-                className="text-white hover:text-yellow-300 transition-colors duration-300 transform hover:scale-105"
-              >
-                Dashboard
-              </a>
-            </li>
           </ul>
         </nav>
       </div>
