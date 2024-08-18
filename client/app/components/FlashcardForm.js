@@ -119,7 +119,7 @@ const FlashcardForm = () => {
                 <h2 className="text-lg font-semibold mb-2">{flashcard.front}</h2>
                 <p className="text-gray-700">{flashcard.back}</p>
                 <button
-                  className="absolute bottom-2 p-2 right-2 bg-red-600 text-white p-1 rounded-md hover:bg-red-700 transition-colors duration-300"
+                  className="absolute bottom-2 p-2 right-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-300"
                   onClick={() => handleDeleteFlashcard(flashcard.id)}
                 >
                   Del
