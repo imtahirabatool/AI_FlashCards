@@ -25,9 +25,9 @@ export default function Home() {
   return (
     <Provider store={store}>
       <div
-        className={`min-h-screen  p-10 flex flex-col items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 text-white ${inter.className}`}
+        className={`min-h-screen mt-16 p-10 flex flex-col items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 text-white ${inter.className}`}
       >
-        {/* Header Section */}
+        {/* Header Section */} 
         <header className="text-center mb-12">
           <motion.div
             initial={{ opacity: 0, y: -50 }}
