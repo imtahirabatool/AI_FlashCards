@@ -9,9 +9,9 @@ export default function Header() {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
-    <header className="bg-blue-600 p-4 text-white shadow-md">
-      <div className="container mx-auto px-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold hover:text-violet-200 transition-colors duration-300">
+    <header className="bg-blue-600 fixed w-full gap-3 top-0 left-0 shadow-lg z-50">
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-white hover:text-violet-200 transition-colors duration-300">
           SmartFlash Vault
         </h1>
         <button
@@ -34,9 +34,9 @@ export default function Header() {
           </svg>
         </button>
         <nav
-          className={`lg:flex lg:items-center lg:space-x-6 ${
-            isMenuOpen ? "block" : "hidden"
-          } lg:block`}
+          className={`hidden lg:flex lg:items-center lg:space-x-6 ${
+            isMenuOpen ? "block" : ""
+          }`}
         >
           <ul className="flex flex-col lg:flex-row lg:space-x-6 space-y-4 lg:space-y-0">
             <li>
@@ -82,6 +82,48 @@ export default function Header() {
           </ul>
         </nav>
       </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="absolute right-0 top-full mt-2 w-40 bg-blue-500 text-start bg-opacity-80 text-white py-2 rounded-lg shadow-lg">
+          <nav className="flex flex-col items-end space-y-2 px-4">
+            <a
+              href="/"
+              onClick={() => setIsMenuOpen(false)}
+              className="sm:text-sm md:text-base text-white hover:text-pink-300 transition-colors duration-300 text-lg"
+            >
+              Home
+            </a>
+            {!isSignedIn ? (
+              <a
+                href="/sign-in"
+                onClick={() => setIsMenuOpen(false)}
+                className="sm:text-sm md:text-base text-white hover:text-pink-300 transition-colors duration-300 text-lg"
+              >
+                Sign In
+              </a>
+            ) : (
+              <>
+                <a
+                  href="/dashboard"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="sm:text-sm md:text-base text-white hover:text-pink-300 transition-colors duration-300 text-lg"
+                >
+                  Dashboard
+                </a>
+                <UserButton
+                  userProfileMode="navigation"
+                  appearance={{
+                    elements: {
+                      userButtonAvatarBox: "w-8 h-8",
+                    },
+                  }}
+                />
+              </>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

@@ -24,9 +24,13 @@ export default function RootLayout({ children }) {
             <meta name="description" content={metadata.description} />
             <PlausibleProvider domain="https://ai-flash-cards.vercel.app/" />
           </head>
-          <body className={`${inter.className} bg-gray-200 text-gray-900`}>
+          <body
+            className={`${inter.className} bg-gray-200 text-gray-900 flex flex-col min-h-screen`}
+          >
             <Header />
-            <main className="container mx-auto px-4 py-8">{children}</main>
+            <main className="flex-grow container mx-auto px-4 py-8">
+              {children}
+            </main>
             <footer className="bg-blue-600 text-white py-4 text-center shadow-md">
               <p>&copy; 2024 SmartFlash Vault. All rights reserved.</p>
             </footer>
