@@ -1,15 +1,32 @@
-"use-client";
-import React, { useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, doc, writeBatch, getDocs, query, where, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useUser } from "@clerk/nextjs";
 
-const FlashcardForm = ({ onAddFlashcard }) => {
+const FlashcardForm = () => {
   const { user } = useUser();
   const [topic, setTopic] = useState("");
   const [generatedFlashcards, setGeneratedFlashcards] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserFlashcards();
+    }
+  }, [user]);
+
+  const fetchUserFlashcards = async () => {
+    try {
+      const q = query(collection(db, "flashcards"), where("userId", "==", user.id));
+      const querySnapshot = await getDocs(q);
+      const userFlashcards = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setGeneratedFlashcards(userFlashcards);
+    } catch (error) {
+      console.error("Error fetching flashcards:", error);
+    }
+  };
 
   const handleGenerateFlashcard = async () => {
     if (!topic.trim()) return;
@@ -35,24 +52,38 @@ const FlashcardForm = ({ onAddFlashcard }) => {
     }
 
     try {
-      const batch = db.batch();
-      generatedFlashcards.forEach(async (flashcard) => {
+      const batch = writeBatch(db);
+      generatedFlashcards.forEach((flashcard) => {
         const newFlashcard = { ...flashcard, userId: user.id };
-        const docRef = collection(db, "flashcards");
-        batch.set(docRef, newFlashcard);
+        const docRef = doc(collection(db, "flashcards")); // create a document reference
+        batch.set(docRef, newFlashcard); // set the document with the flashcard data
       });
 
-      await batch.commit();
-      onAddFlashcard();
-      setGeneratedFlashcards([]);
-      setTopic("");
+      await batch.commit(); // commit the batch write
+      alert("Flashcard added to Firebase successfully!");
+
+      // Fetch the updated flashcards from Firebase
+      fetchUserFlashcards();
     } catch (error) {
       console.error("Error adding flashcards:", error);
     }
   };
 
+  const handleDeleteFlashcard = async (id) => {
+    try {
+      await deleteDoc(doc(db, "flashcards", id));
+      setGeneratedFlashcards(prevFlashcards =>
+        prevFlashcards.filter(flashcard => flashcard.id !== id)
+      );
+      alert("Flashcard deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting flashcard:", error);
+    }
+  };
+
   const handleDeleteAll = () => {
     setGeneratedFlashcards([]);
+    alert("All Flashcards are going to delete!");
   };
 
   return (
@@ -84,9 +115,15 @@ const FlashcardForm = ({ onAddFlashcard }) => {
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {generatedFlashcards.map((flashcard, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg shadow-md">
+              <div key={index} className="relative bg-white p-4 rounded-lg shadow-md">
                 <h2 className="text-lg font-semibold mb-2">{flashcard.front}</h2>
                 <p className="text-gray-700">{flashcard.back}</p>
+                <button
+                  className="absolute bottom-2 p-2 right-2 bg-red-600 text-white p-1 rounded-md hover:bg-red-700 transition-colors duration-300"
+                  onClick={() => handleDeleteFlashcard(flashcard.id)}
+                >
+                  Del
+                </button>
               </div>
             ))}
           </div>
@@ -104,7 +141,7 @@ const FlashcardForm = ({ onAddFlashcard }) => {
               onClick={handleDeleteAll}
               className="ml-2 bg-red-600 text-white p-2 px-3 rounded-md hover:bg-red-700 transition-colors duration-300"
             >
-              Delete 
+              Delete All
             </button>
           </div>
         </div>
