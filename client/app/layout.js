@@ -3,8 +3,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
+import Header from "./Header";
 import { ClerkProvider } from "@clerk/nextjs";
-import Header from "./Header"; // Adjust the path according to your folder structure
+import PlausibleProvider from "next-plausible";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,6 +22,7 @@ export default function RootLayout({ children }) {
           <head>
             <title>{metadata.title}</title>
             <meta name="description" content={metadata.description} />
+            <PlausibleProvider domain="https://ai-flash-cards.vercel.app/" />
           </head>
           <body className={`${inter.className} bg-gray-200 text-gray-900`}>
             <Header />

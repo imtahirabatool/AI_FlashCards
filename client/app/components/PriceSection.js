@@ -7,20 +7,20 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
 const PricingSection = () => {
-  const { isSignedIn } = useUser(); // Get user sign-in status from Clerk
+  const { isSignedIn } = useUser();
   const router = useRouter();
 
   const handleBasicPlanClick = () => {
     if (isSignedIn) {
-      router.push("/dashboard"); // Redirect to dashboard if the user is signed in
+      router.push("/dashboard");
     } else {
-      router.push("/sign-in"); // Redirect to sign-in if the user is not signed in
+      router.push("/sign-in");
     }
   };
 
   const handleProSubmit = async () => {
     if (!isSignedIn) {
-      router.push("/sign-in"); // Redirect to sign-in if the user is not logged in
+      router.push("/sign-in");
       return;
     }
 

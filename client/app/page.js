@@ -16,9 +16,9 @@ export default function Home() {
 
   const handleGetStarted = () => {
     if (isSignedIn) {
-      router.push("/dashboard"); // Redirect to dashboard if signed in
+      router.push("/dashboard");
     } else {
-      router.push("/sign-in"); // Redirect to sign-in if not signed in
+      router.push("/sign-in");
     }
   };
 
