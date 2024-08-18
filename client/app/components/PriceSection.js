@@ -5,6 +5,7 @@ import { Card, CardContent, Typography, Button } from "@mui/material";
 import { useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import getStripe from "@/utils/get-stripe";
 
 const PricingSection = () => {
   const { isSignedIn } = useUser();

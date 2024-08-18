@@ -1,7 +1,15 @@
-"use-client";
-import React, { useState } from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { collection, doc, writeBatch, getDocs, query, where, deleteDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  writeBatch,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+} from "firebase/firestore";
 import { db } from "../../firebase";
 import { useUser } from "@clerk/nextjs";
 import "../globals.css";
@@ -20,9 +28,15 @@ const FlashcardForm = () => {
 
   const fetchUserFlashcards = async () => {
     try {
-      const q = query(collection(db, "flashcards"), where("userId", "==", user.id));
+      const q = query(
+        collection(db, "flashcards"),
+        where("userId", "==", user.id)
+      );
       const querySnapshot = await getDocs(q);
-      const userFlashcards = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const userFlashcards = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       setGeneratedFlashcards(userFlashcards);
     } catch (error) {
       console.error("Error fetching flashcards:", error);
@@ -39,6 +53,8 @@ const FlashcardForm = () => {
       });
       const flashcards = response.data.flashcards || [];
       setGeneratedFlashcards(flashcards);
+
+      setTopic("");
     } catch (error) {
       console.error("Error generating flashcards:", error);
     } finally {
@@ -56,14 +72,12 @@ const FlashcardForm = () => {
       const batch = writeBatch(db);
       generatedFlashcards.forEach((flashcard) => {
         const newFlashcard = { ...flashcard, userId: user.id };
-        const docRef = doc(collection(db, "flashcards")); // create a document reference
-        batch.set(docRef, newFlashcard); // set the document with the flashcard data
+        const docRef = doc(collection(db, "flashcards"));
+        batch.set(docRef, newFlashcard);
       });
 
-      await batch.commit(); // commit the batch write
-      alert("Flashcard added to Firebase successfully!");
-
-      // Fetch the updated flashcards from Firebase
+      await batch.commit();
+      alert("Flashcard added successfully!");
       fetchUserFlashcards();
     } catch (error) {
       console.error("Error adding flashcards:", error);
@@ -73,8 +87,8 @@ const FlashcardForm = () => {
   const handleDeleteFlashcard = async (id) => {
     try {
       await deleteDoc(doc(db, "flashcards", id));
-      setGeneratedFlashcards(prevFlashcards =>
-        prevFlashcards.filter(flashcard => flashcard.id !== id)
+      setGeneratedFlashcards((prevFlashcards) =>
+        prevFlashcards.filter((flashcard) => flashcard.id !== id)
       );
       alert("Flashcard deleted successfully!");
     } catch (error) {
@@ -116,9 +130,17 @@ const FlashcardForm = () => {
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {generatedFlashcards.map((flashcard, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg shadow-md">
-                <h2 className="text-lg font-semibold mb-2">{flashcard.front}</h2>
-                <p className="text-gray-700">{flashcard.back}</p>
+              <div key={index} className="flashcard-container w-64 h-48">
+                <div className="flashcard">
+                  <div className="side front p-4">
+                    <h2 className="text-lg font-semibold mb-2 text-center">
+                      {flashcard.front}
+                    </h2>
+                  </div>
+                  <div className="side back p-4">
+                    <p className="text-center">{flashcard.back}</p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -136,7 +158,7 @@ const FlashcardForm = () => {
               onClick={handleDeleteAll}
               className="ml-2 bg-red-600 text-white p-2 px-3 rounded-md hover:bg-red-700 transition-colors duration-300"
             >
-              Delete 
+              Delete
             </button>
           </div>
         </div>
