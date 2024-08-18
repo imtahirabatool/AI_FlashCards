@@ -5,6 +5,7 @@ import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import { ClerkProvider, useUser, UserButton } from "@clerk/nextjs"; 
 import { useState } from "react";
+import PlausibleProvider from "next-plausible";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,6 +22,7 @@ export default function RootLayout({ children }) {
           <head>
             <title>{metadata.title}</title>
             <meta name="description" content={metadata.description} />
+            <PlausibleProvider domain="https://ai-flash-cards.vercel.app/"/>
           </head>
           <body className={`${inter.className} bg-gray-200 text-gray-900`}>
             <Header />
