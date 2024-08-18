@@ -5,10 +5,23 @@ import { motion } from "framer-motion";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import PricingSection from "./components/PriceSection";
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const { isSignedIn } = useUser();
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    if (isSignedIn) {
+      router.push("/dashboard"); // Redirect to dashboard if signed in
+    } else {
+      router.push("/sign-in"); // Redirect to sign-in if not signed in
+    }
+  };
+
   return (
     <Provider store={store}>
       <div
@@ -28,7 +41,7 @@ export default function Home() {
           <nav>
             <Button
               variant="contained"
-              href="/sign-in"
+              onClick={handleGetStarted}
               sx={{
                 bgcolor: "white",
                 color: "purple",
@@ -95,9 +108,8 @@ export default function Home() {
                 </Typography>
               </CardContent>
             </Card>
-
           </div>
-            <PricingSection/>
+          <PricingSection />
         </section>
       </div>
     </Provider>

@@ -1,13 +1,29 @@
+"use client";
+
 import React from "react";
 import { Card, CardContent, Typography, Button } from "@mui/material";
-import getStripe from "@/utils/get-stripe";
-import { useSelector } from "react-redux";
+import { useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 const PricingSection = () => {
-  const user = useSelector((state) => state.user.user);
+  const { isSignedIn } = useUser(); // Get user sign-in status from Clerk
+  const router = useRouter();
 
-  const handleSubmit = async (event) => {
+  const handleBasicPlanClick = () => {
+    if (isSignedIn) {
+      router.push("/dashboard"); // Redirect to dashboard if the user is signed in
+    } else {
+      router.push("/sign-in"); // Redirect to sign-in if the user is not signed in
+    }
+  };
+
+  const handleProSubmit = async () => {
+    if (!isSignedIn) {
+      router.push("/sign-in"); // Redirect to sign-in if the user is not logged in
+      return;
+    }
+
     const checkoutSession = await fetch("/pages/api/checkout_session", {
       method: "POST",
       headers: {
@@ -37,7 +53,7 @@ const PricingSection = () => {
       <Typography variant="h4" className="mb-5 text-center">
         Choose Your Plan
       </Typography>
-      <br/>
+      <br />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Basic Plan */}
         <Card
@@ -62,7 +78,7 @@ const PricingSection = () => {
               variant="contained"
               color="primary"
               className="mt-4"
-              href="/sign-in"
+              onClick={handleBasicPlanClick}
             >
               Get Started
             </Button>
@@ -93,7 +109,7 @@ const PricingSection = () => {
               variant="contained"
               color="secondary"
               className="mt-4"
-              onClick={handleSubmit}
+              onClick={handleProSubmit}
             >
               Upgrade to Pro
             </Button>
