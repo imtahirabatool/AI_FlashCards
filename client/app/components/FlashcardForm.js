@@ -84,15 +84,35 @@ const FlashcardForm = () => {
     }
   };
 
-  const handleDeleteFlashcard = async (id) => {
+  const handleDeleteAllFlashcards = async () => {
+    if (!user) {
+      alert("You need to sign in to delete flashcards.");
+      return;
+    }
+
     try {
-      await deleteDoc(doc(db, "flashcards", id));
-      setGeneratedFlashcards((prevFlashcards) =>
-        prevFlashcards.filter((flashcard) => flashcard.id !== id)
+      const q = query(
+        collection(db, "flashcards"),
+        where("userId", "==", user.id)
       );
-      alert("Flashcard deleted successfully!");
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        alert("No flashcards to delete.");
+        return;
+      }
+
+      const batch = writeBatch(db);
+      querySnapshot.docs.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+
+      await batch.commit();
+      setGeneratedFlashcards([]);
+      alert("All flashcards deleted successfully!");
     } catch (error) {
-      console.error("Error deleting flashcard:", error);
+      console.error("Error deleting all flashcards:", error);
+      alert("Failed to delete all flashcards.");
     }
   };
 
@@ -129,8 +149,8 @@ const FlashcardForm = () => {
       {generatedFlashcards.length > 0 && (
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {generatedFlashcards.map((flashcard, index) => (
-              <div key={index} className="flashcard-container w-64 h-48">
+            {generatedFlashcards.map((flashcard) => (
+              <div key={flashcard.id} className="flashcard-container w-64 h-48">
                 <div className="flashcard">
                   <div className="side front p-4">
                     <h2 className="text-lg font-semibold mb-2 text-center">
@@ -151,14 +171,14 @@ const FlashcardForm = () => {
               onClick={handleAddFlashcards}
               className="bg-green-600 text-white p-2 px-4 rounded-md hover:bg-green-700 transition-colors duration-300"
             >
-              Add
+              Add All
             </button>
             <button
               type="button"
-              onClick={handleDeleteAll}
-              className="ml-2 bg-red-600 text-white p-2 px-3 rounded-md hover:bg-red-700 transition-colors duration-300"
+              onClick={handleDeleteAllFlashcards}
+              className="ml-2 bg-red-600 text-white p-2 px-4 rounded-md hover:bg-red-700 transition-colors duration-300"
             >
-              Delete
+              Delete All
             </button>
           </div>
         </div>

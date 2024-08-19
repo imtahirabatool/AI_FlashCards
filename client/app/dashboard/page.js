@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import FlashcardForm from "../components/FlashcardForm";
-// import FlashcardList from "../components/FlashcardList";
 
 const Dashboard = () => {
   return (
@@ -11,7 +10,6 @@ const Dashboard = () => {
         >
           <h1 className="text-2xl font-bold text-center mb-6">My Flashcards</h1>
           <FlashcardForm />
-          {/* <FlashcardList /> */}
         </div>
       </div>
   );
