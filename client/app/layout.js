@@ -10,8 +10,8 @@ import PlausibleProvider from "next-plausible";
 const inter = Inter({ subsets: ["latin"] });
 
 const metadata = {
-  title: "FlashCard & Stripe",
-  description: "Flashcard and Stripe integration project",
+  title: "SmartFlash Vault",
+  description: "AI generated Flashcard and Stripe integration project",
 };
 
 export default function RootLayout({ children }) {
